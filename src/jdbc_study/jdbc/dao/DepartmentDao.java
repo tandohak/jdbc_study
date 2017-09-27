@@ -59,11 +59,11 @@ public class DepartmentDao {
 			pstmt = DBCon.getInstance().getConn().prepareStatement(sql);
 			pstmt.setInt(1, dept.getDeptNo());
 			Department department = null;
-			ResultSet res = pstmt.executeQuery();
-			while(res.next()){
-				int deptNo = res.getInt(1);
-				String deptname = res.getString(2);
-				int floor =  res.getInt(3);
+			rs = pstmt.executeQuery();
+			if(rs.next()){
+				int deptNo = rs.getInt(1);
+				String deptname = rs.getString(2);
+				int floor =  rs.getInt(3);
 				department = new Department(deptNo, deptname, floor);
 			};			
 
