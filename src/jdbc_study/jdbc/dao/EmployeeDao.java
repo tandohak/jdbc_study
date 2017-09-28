@@ -27,6 +27,8 @@ public class EmployeeDao {
 		return instance;
 	}
 	
+	
+	
 	public List<Employee> selectEmployeeByAll(){
 		List<Employee> lists = new ArrayList<>();
 		sql = "select * from employee";
@@ -79,13 +81,16 @@ public class EmployeeDao {
 	}
 	
 	public void updateEmployee(Employee emp){
-		sql = "update employee set title = ? ,salary = ? where empno = ?";
+		sql = "update employee set empname = ?, manager = ?, dno = ? ,title = ? ,salary = ? where empno = ?";
 		con = DBCon.getInstance().getConn();
 		try {
 			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1,emp.getTitle());
-			pstmt.setInt(2, emp.getSalary());
-			pstmt.setInt(3,emp.getEmpno());
+			pstmt.setString(1, emp.getEmpname());
+			pstmt.setInt(2,emp.getManager());
+			pstmt.setInt(3,emp.getDno());
+			pstmt.setString(4,emp.getTitle());
+			pstmt.setInt(5,emp.getSalary());
+			pstmt.setInt(6,emp.getEmpno());
 			
 			int res = pstmt.executeUpdate();
 			if(res < 0){
@@ -102,10 +107,11 @@ public class EmployeeDao {
 	
 	public Employee selectEmployeeByNo(Employee emp){
 		Employee employee = null;
-		sql = "select * from employee";
+		sql = "select * from employee where empno = ?";
 		con = DBCon.getInstance().getConn();
 		try {
 			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, emp.getEmpno());
 			rs = pstmt.executeQuery();
 			
 			if(rs.next()){

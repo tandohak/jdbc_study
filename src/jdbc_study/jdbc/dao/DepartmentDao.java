@@ -50,6 +50,7 @@ public class DepartmentDao {
 		}
 		return lists;
 	}
+	
 
 	public Department selectDepartmentByNo(Department dept) {
 		
@@ -65,8 +66,7 @@ public class DepartmentDao {
 				String deptname = rs.getString(2);
 				int floor =  rs.getInt(3);
 				department = new Department(deptNo, deptname, floor);
-			};			
-
+			};
 			
 			return department;
 		} catch (SQLException e) {

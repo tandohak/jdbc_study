@@ -38,6 +38,10 @@ public class Department {
 	public void setFloor(int floor) {
 		this.floor = floor;
 	}
+	
+	public Object[] toArray() {
+		return new Object[]{deptNo, deptname, floor};
+	}
 
 	@Override
 	public String toString() {

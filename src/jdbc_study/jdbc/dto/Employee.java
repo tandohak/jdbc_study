@@ -11,7 +11,11 @@ public class Employee {
 	public Employee(int empno) {
 		this.empno = empno;
 	}
-
+	
+	public Object[] toArray(){
+		return new Object[] {empno,empname,title,manager,salary,dno};
+	}
+	
 	public Employee(int empno, String empname, String title, int manager, int salary, int dno) {
 		this.empno = empno;
 		this.empname = empname;
