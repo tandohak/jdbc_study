@@ -1,12 +1,20 @@
 package jdbc_study.jdbc.UI;
 
+import java.awt.Component;
 import java.awt.GridLayout;
-import java.util.ArrayList;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -15,6 +23,7 @@ import javax.swing.table.DefaultTableModel;
 
 import jdbc_study.jdbc.dao.DepartmentDao;
 import jdbc_study.jdbc.dto.Department;
+import jdbc_study.jdbc.dto.Employee;
 
 public class JPanelDept extends JPanel {
 	private JTextField tfDeptName;
@@ -25,6 +34,7 @@ public class JPanelDept extends JPanel {
 	private JButton btnCancle;
 	private DepartmentDao deptDao;
 	private List<Department> lists;
+	private JPopupMenu popup;
 	
 	public void setDeptDao(DepartmentDao deptDao) {
 		this.deptDao = deptDao;
@@ -83,8 +93,48 @@ public class JPanelDept extends JPanel {
 		scrollPane.setViewportView(table);
 		model = new DefaultTableModel(repackLists(lists), columnNames);
 		table.setModel(model);		
+		table.addMouseListener(mouseListener);
+		popup = new JPopupMenu();
+		table.add(popup);
+		JMenuItem itemUpdate = new JMenuItem("수정");
+		JMenuItem itemDelete = new JMenuItem("삭제");
+		popup.add(itemUpdate);	
+		popup.add(itemDelete);	
+		itemUpdate.addActionListener(ItemAction);
+		itemDelete.addActionListener(ItemAction);
 	}	
 	
+	private ActionListener ItemAction = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(e.getActionCommand() == "수정"){
+			
+				int row = table.getSelectedRow();
+				String deptNo = String.valueOf(table.getValueAt(row, 0));
+				Department dept = deptDao.selectDepartmentByNo(new Department(Integer.parseInt(deptNo)));
+				setDept(dept);
+				
+				setBtnAdd("수정");
+			}
+			if(e.getActionCommand() == "삭제"){
+				int row = table.getSelectedRow();
+				String deptNo = String.valueOf(table.getValueAt(row, 0));
+				deptDao.deleteDepartment(new Department(Integer.parseInt(deptNo)));
+				model.removeRow(row);
+			}
+		}
+	};
+	
+	
+
+	private MouseListener mouseListener = new MouseAdapter() {
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if(e.getButton()==3){
+				popup.show((Component) e.getSource(), e.getX(), e.getY());
+			}
+		}
+	};
 	
 	
 	public Object[][] repackLists(List<Department> lists){
@@ -125,18 +175,41 @@ public class JPanelDept extends JPanel {
 		tfDeptFloor.setText(floor);
 	}
 	
+	public boolean tfConfirm(int isType){
+		
+		switch (isType) {
+			case 1:
+				if(tfDeptNo.getText().equals("") || tfDeptNo.getText().equals("") || tfDeptNo.getText().equals("")){
+					JOptionPane.showMessageDialog(null, "빈칸을 모두 체우세요.", "경고!", JOptionPane.WARNING_MESSAGE);
+					return false;
+				}
+				break;
+			case 2:
+				if(tfDeptNo.getText().equals("")){
+					JOptionPane.showMessageDialog(null, "빈칸을 모두 체우세요.", "경고!", JOptionPane.WARNING_MESSAGE);
+					return false;
+				}
+				break;
+		}		
+		
+		return true;	
+		
+	}
+	
 	public void setEnable(boolean isOk){
-		if(!isOk){
-			tfDeptNo.setEnabled(true);
+				
+		if(!isOk){			
 			tfDeptName.setEditable(false);
 			tfDeptFloor.setEditable(false);
 			return;
 		}
+		
 		tfDeptName.setEditable(true);
 		tfDeptFloor.setEditable(true);		
 	}
 	
 	public Department getDept(boolean isOk){
+
 		int deptNo = Integer.parseInt(tfDeptNo.getText());
 		
 		if(isOk){			

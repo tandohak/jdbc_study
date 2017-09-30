@@ -77,6 +77,7 @@ public class DepartmentDao {
 
 	public void insertDepartment(Department dept) {
 		String sql = "insert into department values(?,?,?)";
+
 		try {
 			pstmt = DBCon.getInstance().getConn().prepareStatement(sql);
 			pstmt.setInt(1, dept.getDeptNo());
@@ -91,6 +92,8 @@ public class DepartmentDao {
 			JOptionPane.showMessageDialog(null, dept + "추가하였습니다.");
 
 		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (NullPointerException e){
 			e.printStackTrace();
 		}finally{
 			JdbcUtil.close(pstmt);

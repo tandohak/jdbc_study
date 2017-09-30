@@ -1,20 +1,28 @@
 package jdbc_study.jdbc.UI;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import javafx.scene.control.ComboBox;
 import jdbc_study.jdbc.dao.DepartmentDao;
 import jdbc_study.jdbc.dao.EmployeeDao;
 import jdbc_study.jdbc.dto.Department;
@@ -35,6 +43,8 @@ public class JPanelEmp extends JPanel {
 	private static final String[] columnNames =  new String[] {"사원 번호", "사원명", "직급", "관리자", "급여", "부서번호"};
 	private List<Employee> lists;
 	private List<Department> deptLists;
+	private JPopupMenu popup;
+	
 	public JPanelEmp() {
 		deptDao = DepartmentDao.getInstance();
 		deptLists = deptDao.selectDepartmentByAll();
@@ -113,11 +123,91 @@ public class JPanelEmp extends JPanel {
 		
 		table = new JTable();
 		
-		DefaultTableModel model = new DefaultTableModel(getData(lists), columnNames);
+		model = new DefaultTableModel(getData(lists), columnNames);
 		table.setModel(model);
 		scrollPane.setViewportView(table);
+		table.addMouseListener(mouseListener );
+		popup = new JPopupMenu();
+		table.add(popup);
+		JMenuItem itemUpdate = new JMenuItem("수정");
+		JMenuItem itemDelete = new JMenuItem("삭제");
+		popup.add(itemUpdate);	
+		popup.add(itemDelete);	
+		itemUpdate.addActionListener(ItemAction);
+		itemDelete.addActionListener(ItemAction);
 		
 	}
+	
+	public boolean tfConfirm(int isType){
+		
+		switch (isType) {
+			case 1:
+				if(tfEmpName.getText().equals("")|| tfEmpNo.getText().equals("") || tfEmpSalary.getText().equals("") || tfTitle.getText().equals("")){
+					JOptionPane.showMessageDialog(null, "빈칸을 모두 체우세요.", "경고!", JOptionPane.WARNING_MESSAGE);
+					return false;
+				}
+				break;
+			case 2:
+				if(tfEmpNo.getText().equals("")){
+					JOptionPane.showMessageDialog(null, "빈칸을 모두 체우세요.", "경고!", JOptionPane.WARNING_MESSAGE);
+					return false;
+				}
+				break;
+		}
+		System.out.println("true");
+		return true;
+	}
+	
+	public void setEnable(boolean isOk){		
+		if(!isOk){			
+			tfEmpSalary.setEditable(false);
+			tfEmpName.setEditable(false);
+			tfTitle.setEditable(false);
+			cbEmpDeptNo.setEnabled(false);
+			cbEmpManager.setEnabled(false);
+			return;
+		}
+		cbEmpDeptNo.setEnabled(true);
+		cbEmpManager.setEnabled(true);
+		tfEmpSalary.setEditable(true);
+		tfEmpName.setEditable(true);
+		tfTitle.setEditable(true);
+		
+	}
+	
+	private ActionListener ItemAction = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(e.getActionCommand() == "수정"){
+			
+				int row = table.getSelectedRow();
+				String empNo = String.valueOf(table.getValueAt(row, 0));
+				Employee emp = empDao.selectEmployeeByNo(new Employee(Integer.parseInt(empNo)));
+				setEmp(emp);
+				
+				setBtnName("수정");
+			}
+			if(e.getActionCommand() == "삭제"){
+				int row = table.getSelectedRow();
+				String empNo = String.valueOf(table.getValueAt(row, 0));
+				empDao.deletEmployee(new Employee(Integer.parseInt(empNo)));
+				model.removeRow(row);
+			}
+		}
+	};
+	
+	private MouseListener mouseListener = new MouseAdapter() {
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if(e.getButton()==3){
+				popup.show((Component) e.getSource(), e.getX(), e.getY());
+			}
+		}
+	};
+	private DefaultTableModel model;
+	
+	
+	
 	
 	private String[] getDeptName(List<Department> deptLists){
 		String [] tempList = new String[deptLists.size()];
